@@ -56,17 +56,6 @@ tools/fseeko_test
 tools/fseeko64_test
 tools/gen_comms.c
 tools/registry
-external/io_grib1/io_grib1.f90
-external/io_grib_share/io_grib_share.f90
-external/io_int/diffwrf
-external/io_int/test_io_idx
-external/RSL_LITE/feedback_domain_em_part1.f90
-external/RSL_LITE/feedback_domain_em_part2.f90
-external/RSL_LITE/force_domain_em_part2.f90
-external/RSL_LITE/interp_domain_em_part1.f90
-external/RSL_LITE/interp_domain_em_part2.f90
-external/RSL_LITE/interp_domain_em_part3.f90
-external/RSL_LITE/interp_domain_em_small.f90
 frame/md_calls.inc
 frame/module_dm.F
 frame/module_state_description.F

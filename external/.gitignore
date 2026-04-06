@@ -15,3 +15,15 @@
 
 # Exceptions to top-level .gitignore: many external/ source code files use .f90 extension
 !*.f90
+
+io_grib1/io_grib1.f90
+io_grib_share/io_grib_share.f90
+io_int/diffwrf
+io_int/test_io_idx
+RSL_LITE/feedback_domain_em_part1.f90
+RSL_LITE/feedback_domain_em_part2.f90
+RSL_LITE/force_domain_em_part2.f90
+RSL_LITE/interp_domain_em_part1.f90
+RSL_LITE/interp_domain_em_part2.f90
+RSL_LITE/interp_domain_em_part3.f90
+RSL_LITE/interp_domain_em_small.f90
