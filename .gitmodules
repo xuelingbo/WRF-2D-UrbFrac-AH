@@ -1,6 +1,7 @@
 [submodule "phys/noahmp"]
 	path = phys/noahmp
-	url = https://github.com/NCAR/noahmp
+	url = https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH
+	branch = dev-2d-urbfrac-ah
 [submodule ".ci/hpc-workflows"]
 	path = .ci/hpc-workflows
 	url = https://github.com/islas/hpc-workflows
