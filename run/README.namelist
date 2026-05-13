@@ -966,6 +966,7 @@ use_rap_aero_icbc                   = .false.   ! Set to .true. to ingest real-t
                                                   = 0: no anthropogenic surface heat flux from input data
                                                   = 1: add to first level temperature tendency
                                                   = 2: add to surface sensible heat flux
+                                                  = 3: add to SLUCM in NoahMP
  num_soil_cat                        = 16,      ! number of soil categories in input data
 
  pxlsm_smois_init(max_dom)           = 1        ! PXLSM Soil moisture initialization option 

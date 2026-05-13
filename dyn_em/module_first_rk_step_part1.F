@@ -794,6 +794,7 @@ BENCH_START(surf_driver_tim)
      &        ,SH_URB2D=grid%sh_urb2d     ,LH_URB2D=grid%lh_urb2d         &
      &        ,G_URB2D=grid%g_urb2d                                       & !H urban
      &        ,RN_URB2D=grid%rn_urb2d     , TS_URB2D=grid%ts_urb2d        & !H urban
+     &        ,TRAD_URB2D=grid%trad_urb2d                                 & !H urban       ! xue.lingbo 2026/05/11
      &        ,FRC_URB2D=grid%frc_urb2d                                   & !H urban
      &        ,UTYPE_URB2D=grid%utype_urb2d                               & !H urban
      &        ,SWDDIR=grid%swddir,SWDDIF=grid%swddif                      & !multi-layer urban _gl

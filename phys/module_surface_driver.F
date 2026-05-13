@@ -192,7 +192,7 @@ CONTAINS
      &          ,julian,julyr,drelr_urb2d,drelb_urb2d,drelg_urb2d     & !H urban
      &          ,flxhumr_urb2d,flxhumb_urb2d,flxhumg_urb2d            & !H urban
      &          ,trl_urb3d,tbl_urb3d,tgl_urb3d                        & !H urban
-     &          ,sh_urb2d,lh_urb2d,g_urb2d,rn_urb2d,ts_urb2d          & !H urban
+     &          ,sh_urb2d,lh_urb2d,g_urb2d,rn_urb2d,ts_urb2d,trad_urb2d & !H urban         ! xue.lingbo 2026/05/11
      &          ,frc_urb2d, utype_urb2d                               & !H urban
      &          ,cmr_sfcdif,chr_sfcdif,cmc_sfcdif,chc_sfcdif          &
      &          ,cmgr_sfcdif,chgr_sfcdif                              &
@@ -1313,6 +1313,7 @@ CONTAINS
      REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT):: G_URB2D  !urban
      REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT):: RN_URB2D !urban
      REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT):: TS_URB2D !urban
+     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT):: TRAD_URB2D !urban       ! xue.lingbo 2026/05/11
 !
      REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT)  :: FRC_URB2D  !urban
      INTEGER, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT)  :: UTYPE_URB2D  !urban
@@ -1474,6 +1475,10 @@ CONTAINS
    character*256 :: errmsg
    integer :: errflg
 !
+
+! local var for distributed_ahe_opt                     ! xue.lingbo 2026/05/11
+  REAL, DIMENSION(ims:ime, jms:jme) :: ahe_current
+
 !------------------------------------------------------------------
 ! Initialize local variables
   q_ref2m = 0.0
@@ -3182,14 +3187,24 @@ CONTAINS
 		MP_SNOW  = SNOWNCV, MP_GRAUP  = GRAUPELNCV, MP_HAIL = HAILNCV )
 
          IF(SF_URBAN_PHYSICS > 0 ) THEN  !urban
+
+      ! xue.lingbo 2026/05/11      
+      IF (distributed_ahe_opt == 3) THEN
+         call cal_mon_day(julday, julyr, jmonth, jday)
+         ihour = (jmonth - 1) * 24 + MOD(INT(gmt + xtime / 60.0), 24)
+         ahe_current(:, :) = ahe(:, ihour, :)
+      ELSE
+         ahe_current(:, :) = 0.0
+      END IF
          
 	   call noahmp_urban (sf_urban_physics,     NUM_SOIL_LAYERS,     IVGTYP,ITIMESTEP,  & ! IN : Model configuration 
                                DTBL,         COSZEN,     XLAT_URB2D,                        & ! IN : Time/Space-related
                               T_PHY,        QV_CURR,          U_PHY,      V_PHY,   SWDOWN,  & ! IN : Forcing
                              SWDDIR,         SWDDIF,                                        &
 		                GLW,            P8W,         RAINBL,       DZ8W,      ZNT,  & ! IN : Forcing
-                                TSK,            HFX,            QFX,         LH,   GRDFLX,  & ! IN/OUT : LSM 
-		             ALBEDO,          EMISS,           QSFC,                        & ! IN/OUT : LSM 
+                                TSK,            TRADXY,                       & ! IN/OUT : LSM
+                                HFX,            QFX,         LH,   GRDFLX,  & ! IN/OUT : LSM 
+		             ALBEDO,          EMISS,           QSFC,     NLCAT,    LANDUSEF,          & ! IN/OUT : LSM 
                             ids,ide,        jds,jde,        kds,kde,                        &
                             ims,ime,        jms,jme,        kms,kme,                        &
               i_start(ij),i_end(ij), j_start(ij),j_end(ij), kts,kte,                        &
@@ -3199,7 +3214,8 @@ CONTAINS
 	                   tc_urb2d,       qc_urb2d,       uc_urb2d,                        & !H urban
                          xxxr_urb2d,     xxxb_urb2d,     xxxg_urb2d, xxxc_urb2d,            & !H urban
                           trl_urb3d,      tbl_urb3d,      tgl_urb3d,                        & !H urban
-                           sh_urb2d,       lh_urb2d,        g_urb2d,   rn_urb2d,  ts_urb2d, & !H urban
+                           sh_urb2d,       lh_urb2d,        g_urb2d,   rn_urb2d,            & !H urban
+                           ts_urb2d,     trad_urb2d,                                        & !H urban
                          psim_urb2d,     psih_urb2d,      u10_urb2d,  v10_urb2d,            & !O urban
                        GZ1OZ0_urb2d,     AKMS_URB2D,                                        & !O urban
                           th2_urb2d,       q2_urb2d,      ust_urb2d,                        & !O urban
@@ -3210,7 +3226,7 @@ CONTAINS
                         drelr_urb2d,    drelb_urb2d,    drelg_urb2d,                        & !H urban
                       flxhumr_urb2d,  flxhumb_urb2d,  flxhumg_urb2d,                        & !H urban
                              julian,          julyr,                                        & !H urban
-                          frc_urb2d,    utype_urb2d,                                        & !I urban
+                          frc_urb2d,    utype_urb2d,    ahe_current, distributed_ahe_opt,   & !I urban
                                 chs,           chs2,           cqs2,                        & !H
                       num_urban_ndm,  urban_map_zrd,  urban_map_zwd, urban_map_gd,          & !I multi-layer urban
                        urban_map_zd,  urban_map_zdf,   urban_map_bd, urban_map_wd,          & !I multi-layer urban
@@ -3386,11 +3402,19 @@ CONTAINS
                IF( IVGTYP(I,J) == ISURBAN    .or. IVGTYP(I,J) == LCZ_1_TABLE .or. IVGTYP(I,J) == LCZ_2_TABLE .or. &
                    IVGTYP(I,J) == LCZ_3_TABLE      .or. IVGTYP(I,J) == LCZ_4_TABLE .or. IVGTYP(I,J) == LCZ_5_TABLE .or. &
                    IVGTYP(I,J) == LCZ_6_TABLE      .or. IVGTYP(I,J) == LCZ_7_TABLE .or. IVGTYP(I,J) == LCZ_8_TABLE .or. &
-                   IVGTYP(I,J) == LCZ_9_TABLE      .or. IVGTYP(I,J) == LCZ_10_TABLE .or. IVGTYP(I,J) == LCZ_11_TABLE )THEN
-                 Q2(I,J)  = (FVEGXY(I,J)*Q2MVXY(I,J) + (1.-FVEGXY(I,J))*Q2MBXY(I,J))*(1.-FRC_URB2D(I,J)) +   &
-                             Q2_URB2D(I,J)*FRC_URB2D(I,J)
-                 T2(I,J)  = (FVEGXY(I,J)*T2MVXY(I,J) + (1.-FVEGXY(I,J))*T2MBXY(I,J))*(1.-FRC_URB2D(I,J)) +   &
-                             (TH2_URB2D(i,j)/((1.E5/PSFC(i,j))**RCP))*FRC_URB2D(I,J)
+                   IVGTYP(I,J) == LCZ_9_TABLE      .or. IVGTYP(I,J) == LCZ_10_TABLE .or. IVGTYP(I,J) == LCZ_11_TABLE .or. &
+                   (distributed_ahe_opt==3 .and. LANDUSEF(I,13,J) > 0.0 ) )THEN           ! xue.lingbo 2026/05/11
+                 IF (distributed_ahe_opt==3 .and. LANDUSEF(I,13,J) > 0.0 ) THEN
+                     IF FRC_URB2D(I,J) <= 0.0 THEN FRC_URB2D(I,J) = 0.01
+                     Q2(I,J)  = (FVEGXY(I,J)*Q2MVXY(I,J) + (1.-FVEGXY(I,J))*Q2MBXY(I,J))*(1.-FRC_URB2D(I,J)*LANDUSEF(I,13,J)) +   &
+                                 Q2_URB2D(I,J)*FRC_URB2D(I,J)*LANDUSEF(I,13,J)
+                     T2(I,J)  = (FVEGXY(I,J)*T2MVXY(I,J) + (1.-FVEGXY(I,J))*T2MBXY(I,J))*(1.-FRC_URB2D(I,J)*LANDUSEF(I,13,J)) +   &
+                                 (TH2_URB2D(i,j)/((1.E5/PSFC(i,j))**RCP))*FRC_URB2D(I,J)*LANDUSEF(I,13,J)
+                 ELSE
+                     Q2(I,J)  = (FVEGXY(I,J)*Q2MVXY(I,J) + (1.-FVEGXY(I,J))*Q2MBXY(I,J))*(1.-FRC_URB2D(I,J)) +   &
+                                 Q2_URB2D(I,J)*FRC_URB2D(I,J)
+                     T2(I,J)  = (FVEGXY(I,J)*T2MVXY(I,J) + (1.-FVEGXY(I,J))*T2MBXY(I,J))*(1.-FRC_URB2D(I,J)) +   &
+                                 (TH2_URB2D(i,j)/((1.E5/PSFC(i,j))**RCP))*FRC_URB2D(I,J)
                  TH2(I,J) = T2(i,j)*(1.E5/PSFC(i,j))**RCP
                  U10(I,J)  = U10_URB2D(I,J)                       !urban
                  V10(I,J)  = V10_URB2D(I,J)                       !urban

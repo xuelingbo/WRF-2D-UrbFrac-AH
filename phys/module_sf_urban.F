@@ -90,6 +90,7 @@ USE module_model_constants, ONLY :  piconst
    INTEGER                         :: alhoption       ! anthropogenic latent heat option
    INTEGER                         :: groption        ! anthropogenic latent heat option
    LOGICAL                         :: distributed_aerodynamics_option
+   LOGICAL                         :: distributed_ahe_opt                                  ! xue.lingbo 2026/05/11
    REAL                            :: fgr             ! green roof fraction
    REAL                            :: oasis           ! urban oasis parameter
    REAL, DIMENSION(1:4)            :: DZGR            ! Layer depth of green roof 
@@ -308,6 +309,7 @@ USE module_model_constants, ONLY :  piconst
                     UTYPE,TA,QA,UA,U1,V1,SSG,SSGD,SSGQ,LLG,RAIN,RHOO, & ! I
                     ZA,DECLIN,COSZ,OMG,XLAT,DELT,ZNT,                 & ! I
                     CHS, CHS2,                                        & ! I
+                    AHE,                                              & ! I  ! xue.lingbo 2026/05/11
                     TR, TB, TG, TC, QC, UC,                           & ! H
                     TRL,TBL,TGL,                                      & ! H
                     XXXR, XXXB, XXXG, XXXC,                           & ! H
@@ -319,7 +321,8 @@ USE module_model_constants, ONLY :  piconst
                     lp_urb,hgt_urb,frc_urb,lb_urb,zo_check,           & ! O
                     CMCR,TGR,TGRL,SMR,CMGR_URB,CHGR_URB,jmonth,       & ! H
                     DRELR,DRELB,DRELG,FLXHUMR,FLXHUMB,FLXHUMG,        &
-                    lf_urb_s, z0_urb, vegfrac_in)
+                    lf_urb_s, z0_urb, vegfrac_in,                     &
+                    TRAD)                                               ! O  ! xue.lingbo 2026/05/11
 
    IMPLICIT NONE
 
@@ -381,6 +384,8 @@ USE module_model_constants, ONLY :  piconst
    REAL, INTENT(IN)    :: DELT ! time step                              [s]
    REAL, INTENT(IN)    :: CHS,CHS2 ! CH*U at za and 2 m             [m/s]
 
+   REAL, INTENT(IN)    :: AHE  ! anthropogenic heat                     [W/m^2]       ! xue.lingbo 2026/05/11
+
    REAL, INTENT(INOUT) :: SSGD ! downward direct short wave radiation   [W/m/m]
    REAL, INTENT(INOUT) :: SSGQ ! downward diffuse short wave radiation  [W/m/m]
    REAL, INTENT(INOUT) :: CMR_URB
@@ -430,6 +435,7 @@ USE module_model_constants, ONLY :  piconst
    REAL, INTENT(OUT) :: Q2     ! humidity at 2 m                  [-]
 !m   REAL, INTENT(OUT) :: CHS,CHS2 ! CH*U at za and 2 m             [m/s]
    REAL, INTENT(OUT) :: UST    ! friction velocity                [m/s]
+   REAL, INTENT(OUT) :: TRAD   ! urban radiation temperature    [K]                ! xue.lingbo 2026/05/11
 
 
 !-------------------------------------------------------------------------------
@@ -563,6 +569,8 @@ USE module_model_constants, ONLY :  piconst
 
    INTEGER :: iteration, K, NUDAPT 
    INTEGER :: tloc, tloc2, Kalh
+
+   REAL :: eps_avg, eps_eff                                           ! xue.lingbo 2026/05/11
 
 !===Yang,2014/10/08, urban hydrological variables for single layer UCM===
    REAL :: FLXHUMRP, FLXHUMBP, FLXHUMGP
@@ -791,7 +799,15 @@ USE module_model_constants, ONLY :  piconst
 
 
 ! Miao, 2007/01/17, cal. ah
-   if(ahoption==1) AH=AH*ahdiuprf(tloc)
+! xue.lingbo 2026/05/11, modify the calculation of AH to consider the distributed anthropogenic heat option
+   if(distributed_ahe_opt==3) then
+      AH = AHE
+   else
+      if((distributed_ahe_opt==1) .or. (distributed_ahe_opt==2)) then
+         ahoption=0
+      endif
+      if(ahoption==1) AH=AH*ahdiuprf(tloc)
+   endif
 
 ! Yang, 2014/10/08, cal. alh
    Kalh=0
@@ -1539,7 +1555,7 @@ ENDIF
 !-------------------------------------------------------------------------------
 !===Yang, 2014/10/08, cal. ah. alh. green roof===
  if(groption==1) then
-   if(ahoption==1) then
+   if(ahoption==1 .or. distributed_ahe_opt==3) then                             ! xue.lingbo 2026/05/11
      FLXTH  = ((1.-FGR)*R*FLXTHR + FGR*R*FLXTHGR + W*FLXTHB + RW*FLXTHG)+ AH/RHOO/CPP
    else
      FLXTH  = ((1.-FGR)*R*FLXTHR + FGR*R*FLXTHGR + W*FLXTHB + RW*FLXTHG)
@@ -1553,7 +1569,7 @@ ENDIF
    FLXG =   ((1.-FGR)*R*G0R + FGR*R*G0GR+ W*G0B + RW*G0G)
    LNET =   (1.-FGR) * R * RR + FGR *R* RGR + W * RB +  RW * RG 
  else
-   if(ahoption==1) then
+   if(ahoption==1 .or. distributed_ahe_opt==3) then                             ! xue.lingbo 2026/05/11
      FLXTH  = ( R*FLXTHR  + W*FLXTHB  + RW*FLXTHG ) + AH/RHOO/CPP
    else
      FLXTH  = ( R*FLXTHR  + W*FLXTHB  + RW*FLXTHG )
@@ -1688,6 +1704,13 @@ ENDIF
    END IF
 
 !   TS = (LW/SIG_SI/0.88)**0.25       ! Radiative temperature [K]
+
+   ! effective canyon emissivity: area-weighted emissivity with canyon trapping effect  ! xue.lingbo 2026/05/11
+   eps_avg = (R*EPSR + W*EPSB + RW*EPSG) / (R + W + RW)
+   eps_eff = eps_avg / (1. - (1.-eps_avg)*(1.-SVF))
+   ! LW = LLG*(1-eps_eff) + eps_eff*SIG_SI*TRAD_URB**4.
+   ! Radiative temperature [K] 
+   TRAD_URB = ((LW - (1.-eps_eff)*LLG) / (eps_eff*SIG_SI))**0.25
 
    END SUBROUTINE urban
 !===============================================================================

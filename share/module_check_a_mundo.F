@@ -540,6 +540,27 @@
       END IF
 
 !-----------------------------------------------------------------------
+! xue.lingbo 2026/05/11
+! Check that distributed_ahe_opt==3 requires NoahMP (sf_surface_physics=4)
+! and single-layer urban canopy model (sf_urban_physics=1)
+!-----------------------------------------------------------------------
+      IF (model_config_rec % distributed_ahe_opt .EQ. 3) THEN
+        DO i = 1, model_config_rec % max_dom
+           IF ( .NOT. model_config_rec % grid_allowed(i) ) CYCLE
+           IF ( model_config_rec % sf_surface_physics(i) .NE. NOAHMPSCHEME ) THEN
+              wrf_err_message = '--- ERROR: distributed_ahe_opt=3 only works with NoahMP (sf_surface_physics=4)'
+              CALL wrf_message ( wrf_err_message )
+              count_fatal_error = count_fatal_error + 1
+           END IF
+           IF ( model_config_rec % sf_urban_physics(i) .NE. 1 ) THEN
+              wrf_err_message = '--- ERROR: distributed_ahe_opt=3 only works with SLUCM (sf_urban_physics=1)'
+              CALL wrf_message ( wrf_err_message )
+              count_fatal_error = count_fatal_error + 1
+           END IF
+        END DO
+      END IF
+
+!-----------------------------------------------------------------------
 ! Check that channel irrigation is run with Noah
 !-----------------------------------------------------------------------
       DO i = 1, model_config_rec % max_dom

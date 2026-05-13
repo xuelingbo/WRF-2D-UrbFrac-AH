@@ -590,6 +590,7 @@ CONTAINS
      REAL :: CHS_URB
      REAL :: CHS2_URB
      REAL :: UST_URB
+     REAL :: TRAD_URB   ! urban radiative temperature (unused in Noah) [K]      ! xue.lingbo 2026/05/11
 ! NUDAPT Parameters urban --> lam
      REAL :: mh_urb
      REAL :: stdh_urb
@@ -1438,6 +1439,7 @@ CONTAINS
                        ZA_URB,DECLIN_URB,COSZ_URB,OMG_URB,              & ! I
                        XLAT_URB,DELT_URB,ZNT_URB,                       & ! I
                        CHS_URB, CHS2_URB,                               & ! I
+                       0.0,                                             & ! I AHE (unused in Noah) xue.lingbo 2026/05/11
                        TR_URB, TB_URB, TG_URB, TC_URB, QC_URB,UC_URB,   & ! H
                        TRL_URB,TBL_URB,TGL_URB,                         & ! H
                        XXXR_URB, XXXB_URB, XXXG_URB, XXXC_URB,          & ! H
@@ -1451,7 +1453,8 @@ CONTAINS
                        TGRL_URB,SMR_URB,CMGR_URB,CHGR_URB,jmonth,       & ! H
                        DRELR_URB,DRELB_URB,                             & ! H
                        DRELG_URB,FLXHUMR_URB,FLXHUMB_URB,FLXHUMG_URB,   &
-                       lf_urb_s, z0_urb, vegfrac)
+                       lf_urb_s, z0_urb, vegfrac,                       &
+                       TRAD_URB)
 
 #if 0
           IF(IPRINT) THEN
@@ -2920,6 +2923,7 @@ SUBROUTINE lsm_mosaic(DZ8W,QV3D,P8W3D,T3D,TSK,                      &
      REAL :: CHS_URB
      REAL :: CHS2_URB
      REAL :: UST_URB
+     REAL :: TRAD_URB   ! urban radiative temperature (unused in Noah) [K]   ! xue.lingbo 2026/05/11
 ! NUDAPT Parameters urban --> lam
      REAL :: mh_urb
      REAL :: stdh_urb
@@ -3894,6 +3898,7 @@ SUBROUTINE lsm_mosaic(DZ8W,QV3D,P8W3D,T3D,TSK,                      &
                              ZA_URB,DECLIN_URB,COSZ_URB,OMG_URB,              & ! I
                              XLAT_URB,DELT_URB,ZNT_URB,                       & ! I
                              CHS_URB, CHS2_URB,                               & ! I
+                             0.0,                                             & ! I AHE (unused in Noah) ! xue.lingbo 2026/05/11
                              TR_URB, TB_URB, TG_URB, TC_URB, QC_URB,UC_URB,   & ! H
                              TRL_URB,TBL_URB,TGL_URB,                         & ! H
                              XXXR_URB, XXXB_URB, XXXG_URB, XXXC_URB,          & ! H
@@ -3907,7 +3912,8 @@ SUBROUTINE lsm_mosaic(DZ8W,QV3D,P8W3D,T3D,TSK,                      &
                              TGRL_URB,SMR_URB,CMGR_URB,CHGR_URB,jmonth,       & ! H
                              DRELR_URB,DRELB_URB,                             & ! H
                              DRELG_URB,FLXHUMR_URB,FLXHUMB_URB,FLXHUMG_URB,   &
-                             lf_urb_s, z0_urb, vegfrac)
+                             lf_urb_s, z0_urb, vegfrac,                       &
+                             TRAD_URB)
 
 #if 0
                 IF(IPRINT) THEN
@@ -4774,6 +4780,7 @@ SUBROUTINE lsm_mosaic(DZ8W,QV3D,P8W3D,T3D,TSK,                      &
                              ZA_URB,DECLIN_URB,COSZ_URB,OMG_URB,              & ! I
                              XLAT_URB,DELT_URB,ZNT_URB,                       & ! I
                              CHS_URB, CHS2_URB,                               & ! I
+                             0.0,                                             & ! I AHE (unused in Noah) ! xue.lingbo 2026/05/11
                              TR_URB, TB_URB, TG_URB, TC_URB, QC_URB,UC_URB,   & ! H
                              TRL_URB,TBL_URB,TGL_URB,                         & ! H
                              XXXR_URB, XXXB_URB, XXXG_URB, XXXC_URB,          & ! H
@@ -4787,7 +4794,8 @@ SUBROUTINE lsm_mosaic(DZ8W,QV3D,P8W3D,T3D,TSK,                      &
                              TGRL_URB,SMR_URB,CMGR_URB,CHGR_URB,jmonth,       & ! H
                              DRELR_URB,DRELB_URB,                             & ! H
                              DRELG_URB,FLXHUMR_URB,FLXHUMB_URB,FLXHUMG_URB,   &
-                             lf_urb_s, z0_urb, vegfrac)
+                             lf_urb_s, z0_urb, vegfrac,                       &
+                             TRAD_URB)
 
 #if 0
                 IF(IPRINT) THEN

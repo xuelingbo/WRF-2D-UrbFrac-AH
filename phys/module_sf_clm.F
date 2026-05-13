@@ -59320,6 +59320,7 @@ CONTAINS
      REAL :: CHS_URB
      REAL :: CHS2_URB
      REAL :: UST_URB
+     REAL :: TRAD_URB   ! urban radiative temperature (unused in CLM) [K]   ! xue.lingbo 2026/05/11
 ! ----------------------------------------------------------------------
 ! DECLARATIONS END - urban
 ! ----------------------------------------------------------------------
@@ -60340,6 +60341,7 @@ has_urban_physics : &
                        ZA_URB,DECLIN_URB,COSZ_URB,OMG_URB,              & ! I
                        XLAT_URB,DELT_URB,ZNT_URB,                       & ! I
                        CHS_URB, CHS2_URB,                               & ! I
+                       0.0,                                             & ! I AHE (unused in CLM)  ! xue.lingbo 2026/05/11
                        TR_URB, TB_URB, TG_URB, TC_URB, QC_URB,UC_URB,   & ! H
                        TRL_URB,TBL_URB,TGL_URB,                         & ! H
                        XXXR_URB, XXXB_URB, XXXG_URB, XXXC_URB,          & ! H
@@ -60355,7 +60357,8 @@ has_urban_physics : &
                        TGRL_URB,SMR_URB,CMGR_URB, CHGR_URB, jmonth,     & ! H
                        DRELR_URB,DRELB_URB,                             & ! H
                        DRELG_URB,FLXHUMR_URB,FLXHUMB_URB,FLXHUMG_URB,   &
-                       lf_urb_s, z0_urb, vegfrac)
+                       lf_urb_s, z0_urb, vegfrac,                       &
+                       TRAD_URB)
 !sw--
 
             TS_URB2D(I,J) = TS_URB
