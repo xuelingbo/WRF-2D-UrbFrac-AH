@@ -60341,7 +60341,7 @@ has_urban_physics : &
                        ZA_URB,DECLIN_URB,COSZ_URB,OMG_URB,              & ! I
                        XLAT_URB,DELT_URB,ZNT_URB,                       & ! I
                        CHS_URB, CHS2_URB,                               & ! I
-                       0.0,                                             & ! I AHE (unused in CLM)  ! xue.lingbo 2026/05/11
+                       0, 0.0,                                          & ! I AHE (unused in CLM)  ! xue.lingbo 2026/05/11
                        TR_URB, TB_URB, TG_URB, TC_URB, QC_URB,UC_URB,   & ! H
                        TRL_URB,TBL_URB,TGL_URB,                         & ! H
                        XXXR_URB, XXXB_URB, XXXG_URB, XXXC_URB,          & ! H

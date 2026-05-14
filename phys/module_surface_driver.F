@@ -3399,30 +3399,36 @@ CONTAINS
          IF(SF_URBAN_PHYSICS.eq.1) THEN
            DO j=j_start(ij),j_end(ij)                             !urban
              DO i=i_start(ij),i_end(ij)                           !urban
-               IF( IVGTYP(I,J) == ISURBAN    .or. IVGTYP(I,J) == LCZ_1_TABLE .or. IVGTYP(I,J) == LCZ_2_TABLE .or. &
+               IF(( IVGTYP(I,J) == ISURBAN    .or. IVGTYP(I,J) == LCZ_1_TABLE .or. IVGTYP(I,J) == LCZ_2_TABLE .or. &
                    IVGTYP(I,J) == LCZ_3_TABLE      .or. IVGTYP(I,J) == LCZ_4_TABLE .or. IVGTYP(I,J) == LCZ_5_TABLE .or. &
                    IVGTYP(I,J) == LCZ_6_TABLE      .or. IVGTYP(I,J) == LCZ_7_TABLE .or. IVGTYP(I,J) == LCZ_8_TABLE .or. &
-                   IVGTYP(I,J) == LCZ_9_TABLE      .or. IVGTYP(I,J) == LCZ_10_TABLE .or. IVGTYP(I,J) == LCZ_11_TABLE .or. &
-                   (distributed_ahe_opt==3 .and. LANDUSEF(I,13,J) > 0.0 ) )THEN           ! xue.lingbo 2026/05/11
-                 IF (distributed_ahe_opt==3 .and. LANDUSEF(I,13,J) > 0.0 ) THEN
-                     IF FRC_URB2D(I,J) <= 0.0 THEN FRC_URB2D(I,J) = 0.01
-                     Q2(I,J)  = (FVEGXY(I,J)*Q2MVXY(I,J) + (1.-FVEGXY(I,J))*Q2MBXY(I,J))*(1.-FRC_URB2D(I,J)*LANDUSEF(I,13,J)) +   &
-                                 Q2_URB2D(I,J)*FRC_URB2D(I,J)*LANDUSEF(I,13,J)
-                     T2(I,J)  = (FVEGXY(I,J)*T2MVXY(I,J) + (1.-FVEGXY(I,J))*T2MBXY(I,J))*(1.-FRC_URB2D(I,J)*LANDUSEF(I,13,J)) +   &
-                                 (TH2_URB2D(i,j)/((1.E5/PSFC(i,j))**RCP))*FRC_URB2D(I,J)*LANDUSEF(I,13,J)
-                 ELSE
+                   IVGTYP(I,J) == LCZ_9_TABLE      .or. IVGTYP(I,J) == LCZ_10_TABLE .or. IVGTYP(I,J) == LCZ_11_TABLE )) &
+                   .and. (distributed_ahe_opt .ne. 3) THEN                                ! xue.lingbo 2026/05/11
                      Q2(I,J)  = (FVEGXY(I,J)*Q2MVXY(I,J) + (1.-FVEGXY(I,J))*Q2MBXY(I,J))*(1.-FRC_URB2D(I,J)) +   &
                                  Q2_URB2D(I,J)*FRC_URB2D(I,J)
                      T2(I,J)  = (FVEGXY(I,J)*T2MVXY(I,J) + (1.-FVEGXY(I,J))*T2MBXY(I,J))*(1.-FRC_URB2D(I,J)) +   &
                                  (TH2_URB2D(i,j)/((1.E5/PSFC(i,j))**RCP))*FRC_URB2D(I,J)
-                 TH2(I,J) = T2(i,j)*(1.E5/PSFC(i,j))**RCP
-                 U10(I,J)  = U10_URB2D(I,J)                       !urban
-                 V10(I,J)  = V10_URB2D(I,J)                       !urban
-                 PSIM(I,J) = PSIM_URB2D(I,J)                      !urban
-                 PSIH(I,J) = PSIH_URB2D(I,J)                      !urban
-                 GZ1OZ0(I,J) = GZ1OZ0_URB2D(I,J)                  !urban
-                 AKHS(I,J) = CHS(I,J)                             !urban
-                 AKMS(I,J) = AKMS_URB2D(I,J)                      !urban
+                     TH2(I,J) = T2(i,j)*(1.E5/PSFC(i,j))**RCP
+                     U10(I,J)  = U10_URB2D(I,J)                       !urban
+                     V10(I,J)  = V10_URB2D(I,J)                       !urban
+                     PSIM(I,J) = PSIM_URB2D(I,J)                      !urban
+                     PSIH(I,J) = PSIH_URB2D(I,J)                      !urban
+                     GZ1OZ0(I,J) = GZ1OZ0_URB2D(I,J)                  !urban
+                     AKHS(I,J) = CHS(I,J)                             !urban
+                     AKMS(I,J) = AKMS_URB2D(I,J)                      !urban
+               ELSE IF (distributed_ahe_opt==3 .and. LANDUSEF(I,13,J) > 0.0 ) THEN        ! xue.lingbo 2026/05/11
+                  Q2(I,J)  = (FVEGXY(I,J)*Q2MVXY(I,J) + (1.-FVEGXY(I,J))*Q2MBXY(I,J))*(1.-FRC_URB2D(I,J)*LANDUSEF(I,13,J)) +   &
+                              Q2_URB2D(I,J)*FRC_URB2D(I,J)*LANDUSEF(I,13,J)
+                  T2(I,J)  = (FVEGXY(I,J)*T2MVXY(I,J) + (1.-FVEGXY(I,J))*T2MBXY(I,J))*(1.-FRC_URB2D(I,J)*LANDUSEF(I,13,J)) +   &
+                              (TH2_URB2D(i,j)/((1.E5/PSFC(i,j))**RCP))*FRC_URB2D(I,J)*LANDUSEF(I,13,J)
+                  TH2(I,J) = T2(i,j)*(1.E5/PSFC(i,j))**RCP
+                  U10(I,J)  = U10_URB2D(I,J)                      !urban
+                  V10(I,J)  = V10_URB2D(I,J)                      !urban
+                  PSIM(I,J) = PSIM_URB2D(I,J)                     !urban
+                  PSIH(I,J) = PSIH_URB2D(I,J)                     !urban
+                  GZ1OZ0(I,J) = GZ1OZ0_URB2D(I,J)                 !urban
+                  AKHS(I,J) = CHS(I,J)                            !urban
+                  AKMS(I,J) = AKMS_URB2D(I,J)                     !urban
                END IF                                             !urban
              ENDDO                                                !urban
            ENDDO                                                  !urban

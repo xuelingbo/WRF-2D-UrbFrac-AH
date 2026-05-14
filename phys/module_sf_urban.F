@@ -90,7 +90,6 @@ USE module_model_constants, ONLY :  piconst
    INTEGER                         :: alhoption       ! anthropogenic latent heat option
    INTEGER                         :: groption        ! anthropogenic latent heat option
    LOGICAL                         :: distributed_aerodynamics_option
-   LOGICAL                         :: distributed_ahe_opt                                  ! xue.lingbo 2026/05/11
    REAL                            :: fgr             ! green roof fraction
    REAL                            :: oasis           ! urban oasis parameter
    REAL, DIMENSION(1:4)            :: DZGR            ! Layer depth of green roof 
@@ -309,6 +308,7 @@ USE module_model_constants, ONLY :  piconst
                     UTYPE,TA,QA,UA,U1,V1,SSG,SSGD,SSGQ,LLG,RAIN,RHOO, & ! I
                     ZA,DECLIN,COSZ,OMG,XLAT,DELT,ZNT,                 & ! I
                     CHS, CHS2,                                        & ! I
+                    distributed_ahe_opt,                              & ! I  ! xue.lingbo 2026/05/11  
                     AHE,                                              & ! I  ! xue.lingbo 2026/05/11
                     TR, TB, TG, TC, QC, UC,                           & ! H
                     TRL,TBL,TGL,                                      & ! H
@@ -366,6 +366,8 @@ USE module_model_constants, ONLY :  piconst
    INTEGER, INTENT(IN) :: UTYPE ! urban type [1=Commercial/Industrial, 2=High-intensity residential, 
                                 ! 3=low-intensity residential]
    INTEGER, INTENT(IN) :: jmonth! current month 
+   INTEGER, INTENT(IN) :: distributed_ahe_opt ! distributed anthropogenic heat option ! xue.lingbo 2026/05/11
+
    REAL, INTENT(IN)    :: TA   ! potential temp at 1st atmospheric level [K]
    REAL, INTENT(IN)    :: QA   ! mixing ratio at 1st atmospheric level  [kg/kg]
    REAL, INTENT(IN)    :: UA   ! wind speed at 1st atmospheric level    [m/s]
@@ -1708,9 +1710,9 @@ ENDIF
    ! effective canyon emissivity: area-weighted emissivity with canyon trapping effect  ! xue.lingbo 2026/05/11
    eps_avg = (R*EPSR + W*EPSB + RW*EPSG) / (R + W + RW)
    eps_eff = eps_avg / (1. - (1.-eps_avg)*(1.-SVF))
-   ! LW = LLG*(1-eps_eff) + eps_eff*SIG_SI*TRAD_URB**4.
+   ! LW = LLG*(1-eps_eff) + eps_eff*SIG_SI*TRAD**4.
    ! Radiative temperature [K] 
-   TRAD_URB = ((LW - (1.-eps_eff)*LLG) / (eps_eff*SIG_SI))**0.25
+   TRAD = ((LW - (1.-eps_eff)*LLG) / (eps_eff*SIG_SI))**0.25
 
    END SUBROUTINE urban
 !===============================================================================
@@ -2080,7 +2082,7 @@ ENDIF
    INTEGER,                            INTENT(IN)    :: SF_URBAN_PHYSICS
    INTEGER,                            INTENT(IN)    :: USE_WUDAPT_LCZ !AndreaLCZ
    LOGICAL,                            INTENT(IN)    :: slucm_distributed_drag
-
+   
    INTEGER :: LC, K
    INTEGER :: IOSTATUS, ALLOCATE_STATUS
    INTEGER :: num_roof_layers
