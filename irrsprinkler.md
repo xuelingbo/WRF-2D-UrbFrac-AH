@@ -87,3 +87,37 @@ sprinkler and the event count is increased by 1.
 
 > [!WARNING]
 > Check that park cells have IVGTYP 8 or 9, non-zero `VegFrac` and `IRFRACT` >= `IRR_FRAC`.
+
+---
+
+## Download and Build WRF
+
+Build on Flinders DeepThought HPC with [build_wrf_deepthought.sh](build_wrf_deepthought.sh).
+
+Put the script in the folder where WRF should go, then run it on the **login node**:
+
+```bash
+cd /path/to/this/folder
+bash build_wrf_deepthought.sh        # bash, not sbatch
+```
+
+The script runs in two stages:
+
+| Stage | Where | What it does |
+| ----- | ----- | ------------ |
+| 1. Download | Login node (has internet) | Clones [WRF-2D-UrbFrac-AH](https://github.com/xuelingbo/WRF-2D-UrbFrac-AH) branch `dev-v4.8-Flinders` and all submodules (including the modified [noahmp](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH)) into `WRF-v4.8-Flinders/`, then submits itself with `sbatch` |
+| 2. Compile | `general` partition | Loads the `WRF` module (compiler, MPI, NetCDF), sets `NETCDF`, configures with option 34 (GNU dmpar) and nesting 1 (basic), compiles `em_real` |
+
+Check progress:
+
+```bash
+squeue -u $USER
+tail -f build_wrf_<jobid>.log
+```
+
+The build succeeded if the log ends with `WRF built successfully`, and
+`WRF-v4.8-Flinders/run/` contains `wrf.exe`, `real.exe`, `ndown.exe` and `tc.exe`.
+If it fails, check `WRF-v4.8-Flinders/compile.log`.
+
+To recompile without downloading again, run `sbatch build_wrf_deepthought.sh` instead.
+
