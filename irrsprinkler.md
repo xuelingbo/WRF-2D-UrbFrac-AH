@@ -90,6 +90,52 @@ sprinkler and the event count is increased by 1.
 
 ---
 
+## Output irrigation variables
+
+The Noah-MP irrigation variables are not in `wrfout` by default: in
+[registry.noahmp#L261-L275](Registry/registry.noahmp#L261-L275) they have no `h` flag.
+They are added at run time with the list in [run/my_iofields.txt](run/my_iofields.txt),
+so WRF does not need to be recompiled.
+
+```text
++:h:0:IRFRACT,SIFRACT,MIFRACT,FIFRACT,IRNUMSI,IRNUMMI,IRNUMFI,IRWATSI,IRWATMI,IRWATFI,IRSIVOL,IRMIVOL,IRFIVOL,IRELOSS,IRRSPLH
+```
+
+`+:h:0:` adds the variables to the history stream (`wrfout`).
+Variable names are separated by commas, with no spaces.
+
+Point to the list in `&time_control` of `namelist.input`, one entry per domain:
+
+```text
+ iofields_filename       = "my_iofields.txt", "my_iofields.txt", "my_iofields.txt", "my_iofields.txt",
+ ignore_iofields_warning = .true.,
+```
+
+> [!NOTE]
+> `./compile` replaces `run/namelist.input` with the default one and keeps the old file as
+> `namelist.input.backup.<date>`. Check these two lines after every recompile.
+
+With `opt_irrm = 1` (sprinkler only), these variables have values on park cells:
+
+| Variable | Meaning | Unit | Type |
+| -------- | ------- | ---- | ---- |
+| `IRFRACT` | Irrigated fraction of the grid cell (input) | 0-1 | Static |
+| `IRNUMSI` | Number of sprinkler irrigation events | - | Accumulated |
+| `IRWATSI` | Water still to be applied in the current event | m | Instantaneous |
+| `IRSIVOL` | Sprinkler irrigation water | mm | Accumulated |
+| `IRELOSS` | Water lost to evaporation of sprinkler droplets | mm | Accumulated |
+| `IRRSPLH` | Latent heat of the sprinkler evaporation loss | J m-2 | Accumulated |
+
+Accumulated variables count from the start of the run.
+Take the difference between two output times to get the value for that period,
+e.g. the difference in `IRRSPLH` divided by the interval in seconds is the mean
+sprinkler evaporative cooling in W m-2.
+
+The micro (`MI`) and flood (`FI`) variables, and `SIFRACT`, stay 0 with `opt_irrm = 1`.
+They can be removed from the list to make `wrfout` smaller.
+
+---
+
 ## Download and Build WRF
 
 Build on Flinders DeepThought HPC with [build_wrf_deepthought.sh](build_wrf_deepthought.sh).
