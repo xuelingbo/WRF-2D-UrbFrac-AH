@@ -367,6 +367,7 @@ NOAHMP_MODULES = \
         noahmp/src/ResistanceAboveCanopyMostMod.o \
         noahmp/src/ResistanceCanopyStomataBallBerryMod.o \
         noahmp/src/ResistanceCanopyStomataJarvisMod.o \
+        noahmp/src/ResistanceCanopyStomataMedlynMod.o \
         noahmp/src/ResistanceLeafToGroundMod.o \
         noahmp/src/VaporPressureSaturationMod.o \
         noahmp/src/SurfaceEnergyFluxVegetatedMod.o \

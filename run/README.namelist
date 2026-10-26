@@ -1333,6 +1333,7 @@ Options for use with the Noah-MP Land Surface Model (sf_surface_physics=4):
  opt_crs                            = 1,        ! Noah-MP Stomatal Resistance option:
                                                      1 = Ball-Berry
                                                      2 = Jarvis
+                                                     3 = Medlyn et al. (2011); uses MEDLYNG1 and MEDLYNG0 in NoahmpTable.TBL
  opt_sfc                            = 1         ! Noah-MP surface layer drag coefficient calculation
                                                      1 = Monin-Obukhov
                                                      2 = original Noah (Chen97)

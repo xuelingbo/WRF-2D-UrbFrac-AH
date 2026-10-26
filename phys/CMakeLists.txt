@@ -326,6 +326,7 @@ target_sources(
                   noahmp/src/ResistanceAboveCanopyMostMod.F90
                   noahmp/src/ResistanceCanopyStomataBallBerryMod.F90
                   noahmp/src/ResistanceCanopyStomataJarvisMod.F90
+                  noahmp/src/ResistanceCanopyStomataMedlynMod.F90
                   noahmp/src/ResistanceLeafToGroundMod.F90
                   noahmp/src/VaporPressureSaturationMod.F90
                   noahmp/src/SurfaceEnergyFluxVegetatedMod.F90

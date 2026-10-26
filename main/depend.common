@@ -1913,6 +1913,12 @@ noahmp/src/ResistanceCanopyStomataJarvisMod.o: \
         noahmp/src/HumiditySaturationMod.o
 
 
+noahmp/src/ResistanceCanopyStomataMedlynMod.o: \
+        noahmp/utility/Machine.o \
+        noahmp/src/NoahmpVarType.o \
+        noahmp/src/ConstantDefineMod.o
+
+
 noahmp/src/ResistanceLeafToGroundMod.o: \
         noahmp/utility/Machine.o \
         noahmp/src/NoahmpVarType.o \
@@ -1934,7 +1940,8 @@ noahmp/src/SurfaceEnergyFluxVegetatedMod.o: \
         noahmp/src/ResistanceAboveCanopyChen97Mod.o \
         noahmp/src/ResistanceLeafToGroundMod.o \
         noahmp/src/ResistanceCanopyStomataBallBerryMod.o \
-        noahmp/src/ResistanceCanopyStomataJarvisMod.o
+        noahmp/src/ResistanceCanopyStomataJarvisMod.o \
+        noahmp/src/ResistanceCanopyStomataMedlynMod.o
 
 
 noahmp/src/ResistanceBareGroundChen97Mod.o: \
