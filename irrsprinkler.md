@@ -13,15 +13,15 @@ Notes on the Noah-MP sprinkler irrigation scheme in WRF, for `opt_irr = 1` and `
 
 > [!IMPORTANT]
 > The original cropland check (`FlagCropland`) for sprinkler irrigation is replaced by a
-> park check, `VegType == 8 .or. VegType == 9` (`VegType` = IVGTYP; in MODIFIED_IGBP_MODIS_NOAH, 8 = Woody Savannas, 9 = Savannas), so that parks can be irrigated.
+> vegetation-type check, `VegType < 21 .and. VegType /= 13 .and. VegType /= 17` (`VegType` = IVGTYP; in MODIFIED_IGBP_MODIS_NOAH, 13 = urban, 17 = water).
 > The check is applied consistently in four places:
 >
 > | File | What it controls |
 > | ---- | ---------------- |
-> | [IrrigationPrepareMod.F90#L70](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/src/IrrigationPrepareMod.F90#L70) | Whether `IrrigationTrigger` is called |
-> | [NoahmpMainMod.F90#L84](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/src/NoahmpMainMod.F90#L84) | Whether `IrrigationSprinkler` applies water |
-> | [EnergyMainMod.F90#L340](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/src/EnergyMainMod.F90#L340) | Sensible heat reduced by sprinkler evaporation (`HeatLatentIrriEvap`) |
-> | [BalanceErrorCheckMod.F90#L115](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/src/BalanceErrorCheckMod.F90#L115) | Sprinkler water added to precipitation in the water balance check |
+> | [IrrigationPrepareMod.F90#L70](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/src/IrrigationPrepareMod.F90#L70) | Whether `IrrigationTrigger` is called |
+> | [NoahmpMainMod.F90#L84](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/src/NoahmpMainMod.F90#L84) | Whether `IrrigationSprinkler` applies water |
+> | [EnergyMainMod.F90#L340](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/src/EnergyMainMod.F90#L340) | Sensible heat reduced by sprinkler evaporation (`HeatLatentIrriEvap`) |
+> | [BalanceErrorCheckMod.F90#L115](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/src/BalanceErrorCheckMod.F90#L115) | Sprinkler water added to precipitation in the water balance check |
 >
 > Without the last two changes, park cells would not lose the sprinkler evaporation heat,
 > and the water balance check would stop the model with
@@ -31,22 +31,22 @@ Notes on the Noah-MP sprinkler irrigation scheme in WRF, for `opt_irr = 1` and `
 
 ## Trigger conditions
 
-[IrrigationPrepareMod.F90#L69-L76](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/src/IrrigationPrepareMod.F90#L69-L76)
+[IrrigationPrepareMod.F90#L69-L76](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/src/IrrigationPrepareMod.F90#L69-L76)
 calls `IrrigationTrigger` only when all of the following are true:
 
 | Condition | Code variable | Parameter |
 | --------- | ------------- | --------- |
 | It is a soil time step | `FlagSoilProcess` | `soiltstep` in namelist |
-| It is a park cell | `VegType` (IVGTYP, from wrfinput) is 8 or 9 | |
-| Irrigated fraction is large enough | `IrrigationFracGrid` (IRFRACT, from wrfinput) `>=` threshold | [IRR_FRAC](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/parameters/NoahmpTable.TBL#L518) |
-| Rainfall is below the stop threshold | rainfall `<` threshold | [IR_RAIN](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/parameters/NoahmpTable.TBL#L526) (mm/h) |
+| It is a park cell | `VegType` (IVGTYP, from wrfinput)| |
+| Irrigated fraction is large enough | `IrrigationFracGrid` (IRFRACT, from wrfinput) `>=` threshold | [IRR_FRAC](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/parameters/NoahmpTable.TBL#L526) |
+| Rainfall is below the stop threshold | rainfall `<` threshold | [IR_RAIN](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/parameters/NoahmpTable.TBL#L534) (mm/h) |
 | No irrigation event is in progress | sum of remaining amounts `== 0` | |
 
 With `opt_irr = 1`,
-[IrrigationTriggerMod.F90#L69-L78](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/src/IrrigationTriggerMod.F90#L69-L78)
+[IrrigationTriggerMod.F90#L69-L78](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/src/IrrigationTriggerMod.F90#L69-L78)
 adds no further restriction, so irrigation can occur at any time of the year.
 
-[IrrigationTriggerMod.F90#L80-L91](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/src/IrrigationTriggerMod.F90#L80-L91)
+[IrrigationTriggerMod.F90#L80-L91](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/src/IrrigationTriggerMod.F90#L80-L91)
 sums the available water over the root-zone layers (`NumSoilLayerRoot`),
 weighted by layer thickness.
 
@@ -54,7 +54,7 @@ weighted by layer thickness.
 
 ## Calculate irrigation amount
 
-[IrrigationTriggerMod.F90#L93-L107](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/src/IrrigationTriggerMod.F90#L93-L107)
+[IrrigationTriggerMod.F90#L93-L107](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/src/IrrigationTriggerMod.F90#L93-L107)
 
 ```fortran
 if ( (SoilMoistAvail/SoilMoistAvailMax) <= SoilWatDeficitAllow ) then
@@ -71,9 +71,9 @@ endif
 
 | Variable | Meaning | Source |
 | -------- | ------- | ------ |
-| `SoilMoistAvailMax` | Root-zone available water capacity | [REFSMC](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/parameters/NoahmpTable.TBL#L816) (field capacity) and [WLTSMC](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/parameters/NoahmpTable.TBL#L824) (wilting point) |
+| `SoilMoistAvailMax` | Root-zone available water capacity | [REFSMC](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/parameters/NoahmpTable.TBL#L824) (field capacity) and [WLTSMC](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/parameters/NoahmpTable.TBL#L832) (wilting point) |
 | `SoilMoistAvail` | Current root-zone available water | Current soil liquid water and WLTSMC |
-| `SoilWatDeficitAllow` | Management allowable deficit | [IRR_MAD](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/4f95d35f46b2bc7fdc7ed6300bd47ef73782cb7f/parameters/NoahmpTable.TBL#L521) (default 0.60) |
+| `SoilWatDeficitAllow` | Management allowable deficit | [IRR_MAD](https://github.com/xuelingbo/noahmp-2D-UrbFrac-AH/blob/f7fb848305a1c38d7e404ca66277107453a7e3a7/parameters/NoahmpTable.TBL#L529) (default 0.60) |
 | `IrrigationFracGrid` | Irrigated fraction of the grid cell | IRFRACT in wrfinput |
 | `VegFrac` | Vegetation fraction | Depends on `dveg`|
 
